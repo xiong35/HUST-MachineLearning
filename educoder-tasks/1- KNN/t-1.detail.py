@@ -54,7 +54,7 @@ class kNNClassifier(object):
             # 将欧氏距离升序排序, argsort 不会返回排序后的 数组, 而是其 index
             # 58 行的 sorted_labels 即为其用法, 对 train_label 调用这份 index 即可将 train_label 按照 dist 的顺序排序
             dist_index = dist.argsort()
-            # sorted_labels 即 把所有 train_label 按照((其对应的测试数据)和(样本的距离)升序排序的顺序)进行排序
+            # sorted_labels 即 把所有 train_label 按照(((其对应的测试数据和样本的距离)升序排序)的顺序)进行排序
             sorted_labels = self.train_label[dist_index]
 
             # 用来数每个邻居的标签的种类数的字典
