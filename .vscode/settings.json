@@ -24,5 +24,6 @@
     "titleBar.inactiveBackground": "#51d39c99",
     "titleBar.inactiveForeground": "#15202b99"
   },
-  "peacock.color": "#51d39c"
+  "peacock.color": "#51d39c",
+  "editor.detectIndentation": false
 }
