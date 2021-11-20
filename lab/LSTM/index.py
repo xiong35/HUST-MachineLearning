@@ -14,9 +14,9 @@ import matplotlib.pyplot as plt
 import scikitplot.plotters as skplt
 
 
-top_words = 2000
-epoch_num = 5
-batch_size = 64
+top_words = 5000
+epochs = 5
+batch_size = 128
 max_review_length = 500
 
 
@@ -114,12 +114,12 @@ model = Sequential()
 model.add(Embedding(top_words+2, embedding_vecor_length,
                     input_length=max_review_length))
 model.add(LSTM(100))
-model.add(Dense(1, activation='sigmoid'))
+model.add(Dense(3, activation='sigmoid'))
 model.compile(loss='binary_crossentropy',
               optimizer='adam', metrics=['accuracy'])
 model.summary()
 model.fit(X_train, y_train, validation_data=(X_test, y_test),
-          epochs=5, batch_size=64)
+          epochs=epochs, batch_size=batch_size)
 
 scores = model.evaluate(X_test, y_test, verbose=0)
 print("Accuracy= %.2f%%" % (scores[1]*100))
