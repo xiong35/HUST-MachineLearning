@@ -1,3 +1,4 @@
+from keras.utils import to_categorical
 from numpy.core.numeric import False_
 import scikitplot.plotters as skplt
 import matplotlib.pyplot as plt
@@ -8,6 +9,13 @@ import pandas as pd
 from gensim.models.doc2vec import TaggedDocument
 from gensim.models import Doc2Vec
 import numpy as np
+import matplotlib.pyplot as plt
+import numpy as np
+from keras.models import Sequential
+from keras.layers import Dense, Dropout
+from keras.optimizers import SGD
+import scikitplot.plotters as skplt
+import os
 
 
 def load_array(path, stopword_set=None, word_dict=None, is_test=False):
@@ -120,6 +128,27 @@ def plot_cmat(yte, ypred):
     plt.show()
 
 
+def baseline_model():
+    '''Neural network with 3 hidden layers'''
+    model = Sequential()
+
+    model.add(Dense(256, input_dim=300, activation='relu',
+                    kernel_initializer='normal'))
+    model.add(Dropout(0.3))
+    model.add(Dense(256, activation='relu', kernel_initializer='normal'))
+    model.add(Dropout(0.5))
+    model.add(Dense(80, activation='relu', kernel_initializer='normal'))
+    model.add(Dense(3, activation="softmax", kernel_initializer='normal'))
+
+    # gradient descent
+    sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+
+    # configure the learning process of the model
+    model.compile(loss='categorical_crossentropy',
+                  optimizer=sgd, metrics=['accuracy'])
+    return model
+
+
 def main():
     print("### main ###")
     if not os.path.isfile('./__data__/xtr.npy') or \
@@ -140,17 +169,28 @@ def main():
         xte = np.load('./__data__/xte.npy')
         ytr = np.load('./__data__/ytr.npy')
         yte = np.load('./__data__/yte.npy')
+
+    ytr = to_categorical(ytr, 3)
+    yte = to_categorical(yte, 3)
+
     print("### data loaded ###")
+
+    # Train the model
+    model = baseline_model()
+    model.summary()
     print(xtr.shape, xte.shape, ytr.shape, yte.shape)
 
-    clf = SVC()
-    clf.fit(xtr, ytr)
-    print("### model is fit ###")
-    y_pred = clf.predict(xte)
+    estimator = model.fit(xtr, ytr, epochs=20, batch_size=64)
+    print("Model Trained!")
+    score = model.evaluate(xte, yte)
+    print("")
+    print("Accuracy = " + format(score[1]*100, '.2f') + "%")   # 92.69%
+
+    probabs = model.predict_proba(xte)
+    print("probabs.shape", probabs.shape)
+    y_pred = np.argmax(probabs, axis=1) - 1
+
     np.savetxt('./result.txt', y_pred, fmt="%d", delimiter=" ")
-    m = yte.shape[0]
-    n = (yte != y_pred).sum()
-    print("Accuracy = " + format((m-n)/m*100, '.2f') + "%")   # 88.42%
 
     # Draw the confusion matrix
     plot_cmat(yte, y_pred)
