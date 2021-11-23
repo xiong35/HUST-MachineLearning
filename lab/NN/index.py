@@ -1,5 +1,4 @@
 from keras.utils import to_categorical
-from numpy.core.numeric import False_
 import scikitplot.plotters as skplt
 import matplotlib.pyplot as plt
 from sklearn.svm import SVC
@@ -170,30 +169,27 @@ def main():
         ytr = np.load('./__data__/ytr.npy')
         yte = np.load('./__data__/yte.npy')
 
-    ytr = to_categorical(ytr, 3)
-    yte = to_categorical(yte, 3)
+    encoded_y = []
+    for y in ytr:
+        encoded_y_item = [0, 0, 0]
+        encoded_y_item[int(y)+1] = 1
+        encoded_y.append(encoded_y_item)
+    ytr = np.array(encoded_y)
 
     print("### data loaded ###")
 
     # Train the model
     model = baseline_model()
     model.summary()
-    print(xtr.shape, xte.shape, ytr.shape, yte.shape)
 
     estimator = model.fit(xtr, ytr, epochs=20, batch_size=64)
     print("Model Trained!")
-    score = model.evaluate(xte, yte)
-    print("")
-    print("Accuracy = " + format(score[1]*100, '.2f') + "%")   # 92.69%
 
     probabs = model.predict_proba(xte)
     print("probabs.shape", probabs.shape)
     y_pred = np.argmax(probabs, axis=1) - 1
 
     np.savetxt('./result.txt', y_pred, fmt="%d", delimiter=" ")
-
-    # Draw the confusion matrix
-    plot_cmat(yte, y_pred)
 
 
 main()
